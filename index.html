@@ -71,6 +71,13 @@
                 <h2>合成结果</h2>
               </div>
               <div class="preview-heading-tools">
+                <div class="layout-control">
+                  <span class="control-label">列数</span>
+                  <div class="segmented-control" role="group" aria-label="方图排列列数">
+                    <button id="oneColumnButton" type="button" data-columns="1" aria-pressed="false">1 列</button>
+                    <button id="threeColumnButton" type="button" class="is-active" data-columns="3" aria-pressed="true">3 列</button>
+                  </div>
+                </div>
                 <div class="background-control">
                   <label class="background-picker" for="backgroundColor" title="选择背景色">
                     <span id="backgroundSwatch" class="background-swatch" aria-hidden="true"></span>

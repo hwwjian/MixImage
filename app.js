@@ -1,7 +1,7 @@
 import './styles.css';
 
 const GAP = 2;
-const state = { items: [], draggedId: null, output: null, backgroundMode: 'auto', backgroundColor: '#ffffff' };
+const state = { items: [], draggedId: null, output: null, backgroundMode: 'auto', backgroundColor: '#ffffff', gridColumns: 3 };
 
 const els = {
   fileInput: document.querySelector('#fileInput'),
@@ -15,6 +15,9 @@ const els = {
   backgroundColor: document.querySelector('#backgroundColor'),
   backgroundSwatch: document.querySelector('#backgroundSwatch'),
   backgroundValue: document.querySelector('#backgroundValue'),
+  layoutControl: document.querySelector('.layout-control'),
+  oneColumnButton: document.querySelector('#oneColumnButton'),
+  threeColumnButton: document.querySelector('#threeColumnButton'),
 };
 
 const formatBytes = (bytes) => {
@@ -167,32 +170,42 @@ function getComposition() {
       height: heights.reduce((sum, value) => sum + value, 0) + GAP * (ready.length - 1),
       heights,
       background: getThemeColor(ready),
+      layoutAvailable: false,
     };
   }
-  // Use a standard 3 x 3 board for square image sets up to nine items.
-  // Larger sets expand the board while preserving a near-square canvas.
-  const gridSide = ready.length <= 4 ? Math.max(1, Math.ceil(Math.sqrt(ready.length))) : ready.length <= 9 ? 3 : Math.ceil(Math.sqrt(ready.length));
-  const rowCount = gridSide;
-  const columns = gridSide;
+  const columns = Math.min(state.gridColumns, ready.length);
+  const rowCount = Math.ceil(ready.length / columns);
   const tile = ready[0].width;
-  const rowCounts = Array.from({ length: rowCount }, (_, index) => Math.min(gridSide, Math.max(0, ready.length - index * gridSide)));
+  const rowCounts = Array.from({ length: rowCount }, (_, index) => Math.min(columns, ready.length - index * columns));
   return {
     ready,
     mode: 'grid',
-    width: gridSide * tile + GAP * (gridSide - 1),
-    height: gridSide * tile + GAP * (gridSide - 1),
+    width: columns * tile + GAP * (columns - 1),
+    height: rowCount * tile + GAP * (rowCount - 1),
     columns,
     rowCount,
-    gridSide,
     rowCounts,
     tile,
     background: getThemeColor(ready),
+    layoutAvailable: true,
   };
+}
+
+function updateLayoutControl(isAvailable) {
+  const buttons = [els.oneColumnButton, els.threeColumnButton];
+  els.layoutControl.classList.toggle('is-disabled', !isAvailable);
+  buttons.forEach((button) => {
+    const isActive = Number(button.dataset.columns) === state.gridColumns;
+    button.disabled = !isAvailable;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
 }
 
 function compose() {
   const composition = getComposition();
   if (!composition) {
+    updateLayoutControl(false);
     state.output = null;
     els.previewFrame.classList.remove('has-result');
     els.previewFrame.classList.add('empty-preview');
@@ -200,6 +213,7 @@ function compose() {
     els.downloadButton.disabled = true;
     return;
   }
+  updateLayoutControl(composition.layoutAvailable);
   const { canvas } = els;
   canvas.width = composition.width;
   canvas.height = composition.height;
@@ -259,4 +273,8 @@ els.backgroundColor.addEventListener('input', (event) => {
   state.backgroundColor = event.target.value;
   compose();
 });
+els.oneColumnButton.dataset.columns = '1';
+els.threeColumnButton.dataset.columns = '3';
+els.oneColumnButton.addEventListener('click', () => { state.gridColumns = 1; compose(); });
+els.threeColumnButton.addEventListener('click', () => { state.gridColumns = 3; compose(); });
 renderQueue();

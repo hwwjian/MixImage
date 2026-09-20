@@ -91,6 +91,14 @@ h2 { margin: 0; color: var(--ink); font-family: 'Space Grotesk', sans-serif; fon
 .primary-button:disabled { opacity: .42; cursor: not-allowed; }
 .preview-heading { align-items: end; }
 .preview-heading-tools { display: flex; align-items: center; gap: 13px; }
+.layout-control { display: flex; align-items: center; gap: 8px; }
+.layout-control.is-disabled { opacity: .48; }
+.control-label { color: var(--muted); font-size: 10px; font-weight: 500; }
+.segmented-control { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid #d6dbd5; border-radius: 7px; background: #e8ebe6; }
+.segmented-control button { min-width: 42px; height: 25px; padding: 0 7px; border: 0; border-radius: 5px; color: var(--muted-dark); background: transparent; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+.segmented-control button:hover:not(:disabled):not(.is-active) { color: var(--ink); background: rgba(255,255,255,.66); }
+.segmented-control button.is-active { color: #fff; background: var(--ink); box-shadow: 0 2px 5px rgba(36,43,38,.12); }
+.segmented-control button:disabled { cursor: not-allowed; }
 .background-control { display: flex; align-items: center; gap: 9px; }
 .background-picker { position: relative; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .background-picker input { position: absolute; width: 1px; height: 1px; opacity: 0; }
@@ -140,6 +148,7 @@ h2 { margin: 0; color: var(--ink); font-family: 'Space Grotesk', sans-serif; fon
   .primary-button { width: 100%; }
   .preview-heading { align-items: flex-start; flex-direction: column; gap: 15px; }
   .preview-heading-tools { width: 100%; justify-content: space-between; gap: 8px; }
+  .layout-control { gap: 6px; }
   .preview-frame { min-height: 292px; padding: 18px; margin-top: 18px; }
   .preview-meta { gap: 8px; padding-top: 16px; }
   .preview-meta span, .preview-meta strong { font-size: 9px; }
