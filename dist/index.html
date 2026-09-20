@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f5f1" />
+    <title>MixImage · 图片长图合成</title>
+    <script type="module" crossorigin src="/assets/index-B0w0Z1zm.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-ZdWRWl22.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <span class="brand-copy">
+            <strong>MixImage</strong>
+            <span>轻松合成你的长图</span>
+          </span>
+        </a>
+      </header>
+
+      <main class="workspace">
+        <section class="intro">
+          <div>
+            <p class="eyebrow">IMAGE COMPOSER</p>
+            <h1>图片合成</h1>
+          </div>
+        </section>
+
+        <section class="studio-grid">
+          <div class="control-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="section-kicker">图片来源</p>
+                <h2>导入图片</h2>
+              </div>
+              <button id="clearButton" class="text-button" type="button" disabled>清空 <span aria-hidden="true">⌫</span></button>
+            </div>
+
+            <label class="dropzone" id="dropzone" for="fileInput">
+              <input id="fileInput" type="file" accept="image/*" multiple />
+              <span class="drop-icon" aria-hidden="true">↥</span>
+              <strong>拖动图片到这里</strong>
+              <span>或点击选择文件 · 支持 JPG / PNG / WEBP</span>
+            </label>
+
+            <div class="queue-heading">
+              <div>
+                <p class="section-kicker">图片队列</p>
+                <h2>排列顺序 <span id="imageCount">0</span></h2>
+              </div>
+              <span class="drag-hint">拖动卡片调整顺序</span>
+            </div>
+            <div id="queue" class="queue empty-state">
+              <div class="empty-queue">
+                <span aria-hidden="true">▧</span>
+                <p>还没有图片</p>
+                <small>先把几张图片放进来吧</small>
+              </div>
+            </div>
+
+            <div class="panel-footer">
+              <button id="downloadButton" class="primary-button" type="button" disabled>
+                <span>导出长图</span><span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="preview-panel">
+            <div class="panel-heading preview-heading">
+              <div>
+                <h2>合成结果</h2>
+              </div>
+              <div class="preview-heading-tools">
+                <div class="background-control">
+                  <label class="background-picker" for="backgroundColor" title="选择背景色">
+                    <span id="backgroundSwatch" class="background-swatch" aria-hidden="true"></span>
+                    <span class="background-copy"><span>背景色</span><strong id="backgroundValue">自动主题</strong></span>
+                    <input id="backgroundColor" type="color" value="#ffffff" aria-label="选择背景色" />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div id="previewFrame" class="preview-frame empty-preview">
+              <div class="preview-empty-content">
+                <div class="preview-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
+                <p>你的合成图会出现在这里</p>
+                <small>添加图片后实时预览</small>
+              </div>
+              <canvas id="resultCanvas" aria-label="图片合成预览"></canvas>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
