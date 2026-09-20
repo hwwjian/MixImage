@@ -277,4 +277,5 @@ els.oneColumnButton.dataset.columns = '1';
 els.threeColumnButton.dataset.columns = '3';
 els.oneColumnButton.addEventListener('click', () => { state.gridColumns = 1; compose(); });
 els.threeColumnButton.addEventListener('click', () => { state.gridColumns = 3; compose(); });
+updateLayoutControl(false);
 renderQueue();
