@@ -591,9 +591,10 @@ function renderAlbumQueue() {
   els.albumClearButton.disabled = albumState.items.length === 0;
   const readyCount = albumState.items.filter((item) => item.image).length;
   const isLoading = readyCount < albumState.items.filter((item) => !item.error).length;
+  const pageCapacity = albumState.pageSize === 'auto' ? '自动布局' : `每页 ${albumState.pageSize} 张`;
   els.albumStatus.textContent = albumState.notice || (albumState.items.length < 2
     ? `已添加 ${albumState.items.length} 张，还需 ${2 - albumState.items.length} 张`
-    : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页`}`);
+    : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页 · ${pageCapacity}`}`);
 
   els.albumQueue.querySelectorAll('[data-album-remove]').forEach((button) => button.addEventListener('click', () => removeAlbumItem(button.dataset.albumRemove)));
   els.albumQueue.querySelectorAll('[data-album-id]').forEach((item) => {
@@ -627,7 +628,22 @@ function drawImageCover(context, image, x, y, width, height, transform = {}) {
 
 function drawAlbumItem(context, item, x, y, width, height, hitRegions) {
   drawImageCover(context, item.image, x, y, width, height, item.transform);
-  if (hitRegions) hitRegions.push({ itemId: item.id, x, y, width, height });
+  if (hitRegions) {
+    hitRegions.push({ itemId: item.id, x, y, width, height });
+    if (albumState.selectedItemId === item.id) {
+      context.save();
+      context.strokeStyle = '#d98436';
+      context.lineWidth = 8;
+      context.setLineDash([22, 14]);
+      context.strokeRect(x + 6, y + 6, width - 12, height - 12);
+      context.setLineDash([]);
+      context.fillStyle = '#d98436';
+      [[x, y], [x + width, y], [x, y + height], [x + width, y + height]].forEach(([handleX, handleY]) => {
+        context.fillRect(handleX - 13, handleY - 13, 26, 26);
+      });
+      context.restore();
+    }
+  }
 }
 
 function drawWrappedText(context, text, x, y, maxWidth, lineHeight, maxLines) {
@@ -1032,6 +1048,7 @@ els.albumPageSize.addEventListener('change', (event) => {
   albumState.pageSize = event.target.value;
   albumState.activePage = 0;
   albumState.selectedItemId = null;
+  renderAlbumQueue();
   composeAlbum();
 });
 els.albumScaleRange.addEventListener('input', (event) => {

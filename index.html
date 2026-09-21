@@ -208,22 +208,6 @@
                 </div>
               </div>
 
-              <div id="albumEditControl" class="album-edit-control" hidden>
-                <div class="album-edit-heading">
-                  <span class="control-label">当前图片</span>
-                  <strong id="albumSelectionLabel">未选择</strong>
-                  <button id="albumResetTransform" class="text-button" type="button">恢复</button>
-                </div>
-                <label class="album-scale-control" for="albumScaleRange">
-                  <span>缩放 <output id="albumScaleValue">100%</output></span>
-                  <input id="albumScaleRange" type="range" min="1" max="2.5" step="0.05" value="1" />
-                </label>
-                <div class="album-rotate-actions" role="group" aria-label="旋转图片">
-                  <button id="albumRotateLeft" type="button" aria-label="向左旋转">↶</button>
-                  <button id="albumRotateRight" type="button" aria-label="向右旋转">↷</button>
-                </div>
-              </div>
-
               <div class="panel-footer album-footer">
                 <span id="albumExportNote" class="format-note">A3 PNG · 多页打包 ZIP</span>
                 <button id="albumDownloadButton" class="primary-button" type="button" disabled>
@@ -253,6 +237,21 @@
                     <span id="albumPageValue">0 / 0</span>
                     <button id="albumNextPage" type="button" aria-label="下一页" disabled>›</button>
                   </div>
+                </div>
+              </div>
+              <div id="albumEditControl" class="album-edit-control" hidden>
+                <div class="album-edit-heading">
+                  <span class="control-label">当前图片</span>
+                  <strong id="albumSelectionLabel">未选择</strong>
+                  <button id="albumResetTransform" class="text-button" type="button">恢复</button>
+                </div>
+                <label class="album-scale-control" for="albumScaleRange">
+                  <span>缩放 <output id="albumScaleValue">100%</output></span>
+                  <input id="albumScaleRange" type="range" min="1" max="2.5" step="0.05" value="1" />
+                </label>
+                <div class="album-rotate-actions" role="group" aria-label="旋转图片">
+                  <button id="albumRotateLeft" type="button" aria-label="向左旋转">↶</button>
+                  <button id="albumRotateRight" type="button" aria-label="向右旋转">↷</button>
                 </div>
               </div>
               <div id="albumPreviewFrame" class="preview-frame album-preview-frame empty-preview">
