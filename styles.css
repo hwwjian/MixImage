@@ -21,6 +21,7 @@
 body { margin: 0; min-width: 320px; background: var(--bg); font-weight: 500; }
 button, input { font: inherit; }
 button { cursor: pointer; }
+[hidden] { display: none !important; }
 
 .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
 .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 5vw, 76px); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.78); }
@@ -29,11 +30,18 @@ button { cursor: pointer; }
 .brand-copy { display: flex; flex-direction: column; gap: 1px; line-height: 1.1; }
 .brand-copy strong { color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 16px; letter-spacing: -.03em; }
 .brand-copy span { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: .07em; }
+.tool-nav { display: inline-flex; gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: #f1f3ef; }
+.tool-nav-button { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 0; border-radius: 6px; color: var(--muted-dark); background: transparent; font-size: 12px; font-weight: 600; }
+.tool-nav-button > span { color: var(--accent); font-size: 15px; }
+.tool-nav-button:hover:not(.is-active) { color: var(--ink); background: rgba(255,255,255,.7); }
+.tool-nav-button.is-active { color: #fff; background: var(--ink); box-shadow: 0 2px 7px rgba(34,40,41,.14); }
+.tool-nav-button.is-active > span { color: #f2a65f; }
 .topbar-note { color: var(--muted-dark); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: .03em; }
 .status-dot { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #75a34b; box-shadow: 0 0 0 3px #e5efd7; vertical-align: 1px; }
 
 .workspace { width: min(1230px, calc(100% - 44px)); margin: 0 auto; padding: 32px 0 52px; flex: 1; }
 .intro { display: flex; align-items: center; justify-content: space-between; min-height: 108px; padding-bottom: 21px; border-bottom: 1px solid var(--line); }
+.a3-spec { padding: 7px 10px; border: 1px solid var(--line-dark); border-radius: 6px; color: var(--muted-dark); background: var(--paper); font-family: 'DM Mono', monospace; font-size: 10px; }
 .eyebrow, .section-kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 9px; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; }
 .eyebrow::before, .section-kicker::before { width: 15px; height: 2px; display: inline-block; background: var(--accent); content: ''; }
 h1, h2, p { margin-top: 0; }
@@ -128,16 +136,54 @@ h2 { margin: 0; color: var(--ink); font-family: 'Space Grotesk', sans-serif; fon
 .footer { display: none; }
 .footer span { padding: 0 7px; color: var(--accent); }
 
+.album-studio-grid { grid-template-columns: minmax(360px, .82fr) minmax(500px, 1.18fr); }
+.album-control-panel { padding-bottom: 22px; }
+.album-dropzone { min-height: 142px; margin: 21px 0 15px; }
+.album-dropzone .drop-icon { width: 38px; height: 38px; margin-bottom: 9px; font-size: 20px; }
+.album-queue { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.album-slot, .album-photo { position: relative; min-width: 0; aspect-ratio: 4 / 3; overflow: hidden; border: 1px solid var(--line); border-radius: 7px; background: #f6f7f4; }
+.album-slot { display: grid; place-content: center; gap: 3px; border-style: dashed; color: #b3b9b2; text-align: center; }
+.album-slot span { font-family: 'DM Mono', monospace; font-size: 17px; }
+.album-slot small { font-size: 10px; }
+.album-photo { cursor: grab; }
+.album-photo.is-dragging { opacity: .45; }
+.album-photo img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.album-loading { height: 100%; display: grid; place-items: center; color: var(--muted); font-size: 10px; }
+.album-photo-label { position: absolute; left: 6px; bottom: 6px; padding: 3px 5px; border-radius: 4px; color: #fff; background: rgba(34,40,41,.78); font-size: 9px; }
+.album-remove-button { position: absolute; top: 5px; right: 5px; width: 23px; height: 23px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(255,255,255,.72); border-radius: 50%; color: #fff; background: rgba(34,40,41,.72); font-size: 15px; line-height: 1; }
+.album-remove-button:hover { background: var(--accent); }
+.album-status { min-height: 17px; margin: 8px 0 19px; color: var(--muted); font-size: 11px; }
+.copy-fields { display: grid; gap: 13px; padding-top: 17px; border-top: 1px solid var(--line); }
+.field-label { display: grid; gap: 6px; color: var(--muted-dark); font-size: 11px; font-weight: 600; }
+.field-label input, .field-label textarea { width: 100%; border: 1px solid var(--line-dark); border-radius: 7px; outline: none; color: var(--ink); background: #fbfcfa; font-size: 13px; font-weight: 500; transition: border-color .18s, box-shadow .18s; }
+.field-label input { height: 40px; padding: 0 11px; }
+.field-label textarea { min-height: 86px; padding: 10px 11px; resize: vertical; line-height: 1.55; }
+.field-label input:focus, .field-label textarea:focus { border-color: #d39a62; box-shadow: 0 0 0 3px var(--accent-soft); }
+.field-label input::placeholder, .field-label textarea::placeholder { color: #adb2ad; }
+.album-footer { justify-content: space-between; }
+.album-preview-panel { display: flex; flex-direction: column; }
+.album-preview-frame { min-height: 510px; flex: 1; padding: 22px; }
+.album-preview-frame canvas { width: 100%; aspect-ratio: 3508 / 2480; object-fit: contain; }
+.album-placeholder { width: 112px; aspect-ratio: 1.414 / 1; display: grid; grid-template-columns: 1.55fr 1fr; grid-template-rows: 1fr 1fr; gap: 4px; margin: 0 auto; padding: 7px; border: 1px solid #d6dcd5; border-radius: 5px; background: rgba(255,255,255,.78); }
+.album-placeholder span { display: block; border-radius: 2px; background: #d7dcd6; }
+.album-placeholder span:first-child { grid-row: 1 / 3; background: #c6cec4; }
+.album-placeholder span:nth-child(2) { background: #dfb27e; }
+.album-placeholder span:nth-child(3) { background: #b9c8cb; }
+
 @media (max-width: 900px) {
   .workspace { padding-top: 28px; }
   .intro { display: block; min-height: 0; padding-bottom: 22px; }
   .studio-grid { grid-template-columns: 1fr; gap: 25px; padding-top: 24px; }
+  .album-studio-grid { grid-template-columns: 1fr; }
   .preview-panel { padding: 29px; }
 }
 
 @media (max-width: 560px) {
   .topbar { height: 70px; padding: 0 18px; }
   .topbar-note { display: none; }
+  .brand-copy > span { display: none; }
+  .tool-nav { gap: 2px; padding: 3px; }
+  .tool-nav-button { height: 32px; gap: 5px; padding: 0 8px; font-size: 11px; }
   .workspace { width: min(100% - 28px, 1230px); padding: 24px 0 34px; }
   h1 { font-size: 34px; line-height: 1; }
   .control-panel, .preview-panel { padding: 21px 16px 17px; border-radius: 11px; }
@@ -152,4 +198,10 @@ h2 { margin: 0; color: var(--ink); font-family: 'Space Grotesk', sans-serif; fon
   .preview-frame { min-height: 292px; padding: 18px; margin-top: 18px; }
   .preview-meta { gap: 8px; padding-top: 16px; }
   .preview-meta span, .preview-meta strong { font-size: 9px; }
+  .album-intro { align-items: flex-start; gap: 14px; }
+  .a3-spec { padding: 6px 8px; }
+  .album-dropzone { min-height: 132px; }
+  .album-footer { align-items: stretch; }
+  .format-note { text-align: center; }
+  .album-preview-frame { min-height: 300px; padding: 12px; }
 }

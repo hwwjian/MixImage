@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f5f5f1" />
-    <title>MixImage · 图片长图合成</title>
+    <title>MixImage · 图片创作工具</title>
   </head>
   <body>
     <div class="app-shell">
@@ -16,17 +16,26 @@
             <span>轻松合成你的长图</span>
           </span>
         </a>
+        <nav class="tool-nav" aria-label="功能选择">
+          <button class="tool-nav-button is-active" type="button" data-workspace="composer" aria-pressed="true">
+            <span aria-hidden="true">↕</span>长图合成
+          </button>
+          <button class="tool-nav-button" type="button" data-workspace="album" aria-pressed="false">
+            <span aria-hidden="true">▦</span>相册拼图
+          </button>
+        </nav>
       </header>
 
       <main class="workspace">
-        <section class="intro">
+        <section id="composerWorkspace" class="workspace-section">
+          <div class="intro">
           <div>
             <p class="eyebrow">IMAGE COMPOSER</p>
             <h1>图片合成</h1>
           </div>
-        </section>
+          </div>
 
-        <section class="studio-grid">
+          <div class="studio-grid">
           <div class="control-panel">
             <div class="panel-heading">
               <div>
@@ -94,6 +103,79 @@
                 <small>添加图片后实时预览</small>
               </div>
               <canvas id="resultCanvas" aria-label="图片合成预览"></canvas>
+            </div>
+          </div>
+          </div>
+        </section>
+
+        <section id="albumWorkspace" class="workspace-section" hidden>
+          <div class="intro album-intro">
+            <div>
+              <p class="eyebrow">A3 PHOTO ALBUM</p>
+              <h1>相册拼图</h1>
+            </div>
+            <span class="a3-spec">A3 横版 · 3508 × 2480 px</span>
+          </div>
+
+          <div class="studio-grid album-studio-grid">
+            <div class="control-panel album-control-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="section-kicker">照片素材</p>
+                  <h2>导入 2–3 张图片</h2>
+                </div>
+                <button id="albumClearButton" class="text-button" type="button" disabled>清空 <span aria-hidden="true">⌫</span></button>
+              </div>
+
+              <label class="dropzone album-dropzone" id="albumDropzone" for="albumFileInput">
+                <input id="albumFileInput" type="file" accept="image/*" multiple />
+                <span class="drop-icon" aria-hidden="true">↥</span>
+                <strong>拖入 2 或 3 张照片</strong>
+                <span>系统会根据数量自动选择版式</span>
+              </label>
+
+              <div id="albumQueue" class="album-queue" aria-live="polite">
+                <div class="album-slot"><span>1</span><small>主图</small></div>
+                <div class="album-slot"><span>2</span><small>照片</small></div>
+                <div class="album-slot"><span>3</span><small>可选</small></div>
+              </div>
+              <p id="albumStatus" class="album-status">等待添加照片</p>
+
+              <div class="copy-fields">
+                <label class="field-label" for="albumTitle">
+                  <span>标题</span>
+                  <input id="albumTitle" type="text" maxlength="32" placeholder="例如：海边的夏天" />
+                </label>
+                <label class="field-label" for="albumCopy">
+                  <span>文案</span>
+                  <textarea id="albumCopy" rows="4" maxlength="180" placeholder="写下照片背后的故事…"></textarea>
+                </label>
+              </div>
+
+              <div class="panel-footer album-footer">
+                <span class="format-note">PNG · A3 横版 · 300 DPI</span>
+                <button id="albumDownloadButton" class="primary-button" type="button" disabled>
+                  <span>导出拼图</span><span aria-hidden="true">↓</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="preview-panel album-preview-panel">
+              <div class="panel-heading preview-heading">
+                <div>
+                  <p class="section-kicker">实时预览</p>
+                  <h2>A3 横版画布</h2>
+                </div>
+                <span id="albumLayoutBadge" class="mode-badge">等待图片</span>
+              </div>
+              <div id="albumPreviewFrame" class="preview-frame album-preview-frame empty-preview">
+                <div class="preview-empty-content">
+                  <div class="album-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
+                  <p>拖入照片开始排版</p>
+                  <small>添加 2 张后即可导出</small>
+                </div>
+                <canvas id="albumCanvas" aria-label="A3 相册拼图预览"></canvas>
+              </div>
             </div>
           </div>
         </section>
