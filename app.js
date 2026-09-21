@@ -6,7 +6,7 @@ const A3_WIDTH = 3508;
 const A3_HEIGHT = 2480;
 const albumState = {
   items: [], draggedId: null, output: null, notice: '', activePage: 0, pageCopy: [], layoutVariants: [],
-  backgroundMode: 'auto', backgroundColor: '#ffffff', pageSize: 'auto', textPositions: [], textStyles: [], textTarget: 'title', hitRegions: [], textRegions: [],
+  backgroundMode: 'auto', backgroundColor: '#ffffff', pageSizeOverrides: [], textPositions: [], textStyles: [], textTarget: 'title', hitRegions: [], textRegions: [],
   selectedItemId: null, canvasDrag: null,
 };
 
@@ -381,6 +381,7 @@ function clearAlbum() {
   albumState.activePage = 0;
   albumState.pageCopy = [];
   albumState.layoutVariants = [];
+  albumState.pageSizeOverrides = [];
   albumState.textPositions = [];
   albumState.textStyles = [];
   albumState.textTarget = 'title';
@@ -404,31 +405,37 @@ function moveAlbumItem(sourceId, targetId) {
   composeAlbum();
 }
 
-function getAlbumPageSizes(count, requestedSize = albumState.pageSize) {
-  if (count < 2) return [];
-  if (requestedSize === 'auto') {
-    const pageCount = Math.ceil(count / 6);
-    const baseSize = Math.floor(count / pageCount);
-    const remainder = count % pageCount;
-    return Array.from({ length: pageCount }, (_, index) => baseSize + (index < remainder ? 1 : 0));
-  }
+function getAutoAlbumPageSizes(count) {
+  const pageCount = Math.ceil(count / 6);
+  const baseSize = Math.floor(count / pageCount);
+  const remainder = count % pageCount;
+  return Array.from({ length: pageCount }, (_, index) => baseSize + (index < remainder ? 1 : 0));
+}
 
-  const pageSize = Number(requestedSize);
+function getAlbumPageSizes(count) {
+  if (count < 2) return [];
   const sizes = [];
   let remaining = count;
-  while (remaining > pageSize) {
-    sizes.push(pageSize);
-    remaining -= pageSize;
+  let pageIndex = 0;
+  while (remaining >= 2) {
+    const override = Number(albumState.pageSizeOverrides[pageIndex]);
+    let size;
+    if (Number.isInteger(override) && override >= 2 && override <= 6) {
+      size = Math.min(override, remaining);
+      if (remaining - size === 1 && size > 2) size -= 1;
+    } else {
+      size = getAutoAlbumPageSizes(remaining)[0];
+    }
+    sizes.push(size);
+    remaining -= size;
+    pageIndex += 1;
   }
-  if (remaining === 1 && sizes.length && sizes[sizes.length - 1] > 2) {
-    sizes[sizes.length - 1] -= 1;
-    sizes.push(2);
-  } else if (remaining > 1) {
-    sizes.push(remaining);
-  } else if (remaining === 1) {
-    sizes[sizes.length - 1] += 1;
-  }
+  if (remaining === 1 && sizes.length) sizes[sizes.length - 1] = Math.min(6, sizes[sizes.length - 1] + 1);
   return sizes;
+}
+
+function getActiveAlbumPageSizeSetting() {
+  return albumState.pageSizeOverrides[albumState.activePage] || 'auto';
 }
 
 function getAlbumLayoutVariant(pageIndex, itemCount) {
@@ -591,7 +598,7 @@ function renderAlbumQueue() {
   els.albumClearButton.disabled = albumState.items.length === 0;
   const readyCount = albumState.items.filter((item) => item.image).length;
   const isLoading = readyCount < albumState.items.filter((item) => !item.error).length;
-  const pageCapacity = albumState.pageSize === 'auto' ? '自动布局' : `每页 ${albumState.pageSize} 张`;
+  const pageCapacity = getActiveAlbumPageSizeSetting() === 'auto' ? '当前页自动布局' : `当前页每页 ${getActiveAlbumPageSizeSetting()} 张`;
   els.albumStatus.textContent = albumState.notice || (albumState.items.length < 2
     ? `已添加 ${albumState.items.length} 张，还需 ${2 - albumState.items.length} 张`
     : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页 · ${pageCapacity}`}`);
@@ -816,7 +823,7 @@ function composeAlbum() {
   const allReady = pages.length > 0 && pages.every((entry) => entry.items.every((item) => item.image));
 
   els.albumPageValue.textContent = pages.length ? `${albumState.activePage + 1} / ${pages.length}` : '0 / 0';
-  els.albumPageSize.value = albumState.pageSize;
+  els.albumPageSize.value = getActiveAlbumPageSizeSetting();
   els.albumPreviousPage.disabled = !pages.length || albumState.activePage === 0;
   els.albumNextPage.disabled = !pages.length || albumState.activePage === pages.length - 1;
   els.albumExportNote.textContent = pages.length > 1 ? `${pages.length} 页 A3 PNG · 打包 ZIP` : 'A3 PNG · 3508 × 2480 px';
@@ -1045,8 +1052,11 @@ els.albumFontWeight.addEventListener('change', (event) => updateAlbumTextStyle('
 els.albumFontSize.addEventListener('input', (event) => updateAlbumTextStyle('fontSize', event.target.value));
 els.albumFontColor.addEventListener('input', (event) => updateAlbumTextStyle('color', event.target.value));
 els.albumPageSize.addEventListener('change', (event) => {
-  albumState.pageSize = event.target.value;
-  albumState.activePage = 0;
+  if (event.target.value === 'auto') {
+    delete albumState.pageSizeOverrides[albumState.activePage];
+  } else {
+    albumState.pageSizeOverrides[albumState.activePage] = event.target.value;
+  }
   albumState.selectedItemId = null;
   renderAlbumQueue();
   composeAlbum();
