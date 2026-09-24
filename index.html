@@ -131,7 +131,7 @@
                 <input id="albumFileInput" type="file" accept="image/*" multiple />
                 <span class="drop-icon" aria-hidden="true">↥</span>
                 <strong>拖入多张照片</strong>
-                <span>每页自动安排 2 至 6 张</span>
+                <span>支持单图全屏或每页 2 至 6 张</span>
               </label>
 
               <div id="albumQueue" class="album-queue" aria-live="polite"></div>
@@ -225,6 +225,7 @@
                 <div class="album-preview-tools">
                   <select id="albumPageSize" class="layout-select" aria-label="每页图片数量">
                     <option value="auto">自动布局</option>
+                    <option value="1">单图全屏</option>
                     <option value="2">每页 2 张</option>
                     <option value="3">每页 3 张</option>
                     <option value="4">每页 4 张</option>
@@ -258,7 +259,7 @@
                 <div class="preview-empty-content">
                   <div class="album-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
                   <p>拖入照片开始排版</p>
-                  <small>添加 2 张后自动生成第一页</small>
+                  <small>添加 1 张即可生成单图全屏页面</small>
                 </div>
                 <canvas id="albumCanvas" aria-label="A3 相册拼图预览"></canvas>
               </div>

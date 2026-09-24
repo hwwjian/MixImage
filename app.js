@@ -406,6 +406,7 @@ function moveAlbumItem(sourceId, targetId) {
 }
 
 function getAutoAlbumPageSizes(count) {
+  if (count < 1) return [];
   const pageCount = Math.ceil(count / 6);
   const baseSize = Math.floor(count / pageCount);
   const remainder = count % pageCount;
@@ -413,16 +414,15 @@ function getAutoAlbumPageSizes(count) {
 }
 
 function getAlbumPageSizes(count) {
-  if (count < 2) return [];
+  if (count < 1) return [];
   const sizes = [];
   let remaining = count;
   let pageIndex = 0;
-  while (remaining >= 2) {
+  while (remaining > 0) {
     const override = Number(albumState.pageSizeOverrides[pageIndex]);
     let size;
-    if (Number.isInteger(override) && override >= 2 && override <= 6) {
+    if (Number.isInteger(override) && override >= 1 && override <= 6) {
       size = Math.min(override, remaining);
-      if (remaining - size === 1 && size > 2) size -= 1;
     } else {
       size = getAutoAlbumPageSizes(remaining)[0];
     }
@@ -430,7 +430,6 @@ function getAlbumPageSizes(count) {
     remaining -= size;
     pageIndex += 1;
   }
-  if (remaining === 1 && sizes.length) sizes[sizes.length - 1] = Math.min(6, sizes[sizes.length - 1] + 1);
   return sizes;
 }
 
@@ -599,9 +598,11 @@ function renderAlbumQueue() {
   const readyCount = albumState.items.filter((item) => item.image).length;
   const isLoading = readyCount < albumState.items.filter((item) => !item.error).length;
   const pageCapacity = getActiveAlbumPageSizeSetting() === 'auto' ? '当前页自动布局' : `当前页每页 ${getActiveAlbumPageSizeSetting()} 张`;
-  els.albumStatus.textContent = albumState.notice || (albumState.items.length < 2
-    ? `已添加 ${albumState.items.length} 张，还需 ${2 - albumState.items.length} 张`
-    : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页 · ${pageCapacity}`}`);
+  els.albumStatus.textContent = albumState.notice || (!albumState.items.length
+    ? '已添加 0 张，还需 1 张'
+    : albumState.items.length === 1
+      ? '已添加 1 张 · 单图全屏 · 可继续添加照片'
+      : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页 · ${pageCapacity}`}`);
 
   els.albumQueue.querySelectorAll('[data-album-remove]').forEach((button) => button.addEventListener('click', () => removeAlbumItem(button.dataset.albumRemove)));
   els.albumQueue.querySelectorAll('[data-album-id]').forEach((item) => {
@@ -713,7 +714,10 @@ function renderAlbumPage(page, pageIndex, canvas) {
 
   const variant = page.layoutVariant;
   let layoutName = '';
-  if (ready.length === 2) {
+  if (ready.length === 1) {
+    drawAlbumItem(context, ready[0], 0, 0, A3_WIDTH, A3_HEIGHT, hitRegions);
+    layoutName = '单图 · 全屏叠加文案';
+  } else if (ready.length === 2) {
     const firstWidth = 1930;
     const secondWidth = contentWidth - firstWidth - gap;
     if (variant === 0) {
@@ -837,7 +841,7 @@ function composeAlbum() {
     els.albumPreviewFrame.classList.remove('has-result');
     els.albumPreviewFrame.classList.add('empty-preview');
     els.albumPreviewFrame.querySelector('.preview-empty-content').style.display = 'block';
-    els.albumLayoutName.textContent = albumState.items.length ? (pages.length ? '读取中' : '还需 1 张') : '等待图片';
+    els.albumLayoutName.textContent = albumState.items.length ? (pages.length ? '读取中' : '等待图片') : '等待图片';
     return;
   }
 
