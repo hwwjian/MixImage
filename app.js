@@ -7,7 +7,7 @@ const A3_HEIGHT = 2480;
 const albumState = {
   items: [], draggedId: null, output: null, notice: '', activePage: 0, pageCopy: [], layoutVariants: [],
   backgroundMode: 'auto', backgroundColor: '#ffffff', pageSizeOverrides: [], textPositions: [], textStyles: [], textTarget: 'title', hitRegions: [], textRegions: [],
-  selectedItemId: null, canvasDrag: null,
+  customTemplate: { file: null, url: '', image: null, name: '' }, selectedItemId: null, canvasDrag: null,
 };
 
 const els = {
@@ -30,6 +30,9 @@ const els = {
   albumWorkspace: document.querySelector('#albumWorkspace'),
   albumFileInput: document.querySelector('#albumFileInput'),
   albumDropzone: document.querySelector('#albumDropzone'),
+  albumTemplateInput: document.querySelector('#albumTemplateInput'),
+  albumTemplateName: document.querySelector('#albumTemplateName'),
+  albumTemplateClear: document.querySelector('#albumTemplateClear'),
   albumQueue: document.querySelector('#albumQueue'),
   albumStatus: document.querySelector('#albumStatus'),
   albumClearButton: document.querySelector('#albumClearButton'),
@@ -340,6 +343,44 @@ function addAlbumFiles(fileList) {
   els.albumFileInput.value = '';
 }
 
+function renderAlbumTemplateControl() {
+  const hasTemplate = Boolean(albumState.customTemplate.image);
+  els.albumTemplateName.textContent = hasTemplate ? albumState.customTemplate.name : '未上传';
+  els.albumTemplateClear.disabled = !hasTemplate;
+}
+
+function clearAlbumTemplate() {
+  if (albumState.customTemplate.url) URL.revokeObjectURL(albumState.customTemplate.url);
+  albumState.customTemplate = { file: null, url: '', image: null, name: '' };
+  albumState.notice = '';
+  renderAlbumTemplateControl();
+  renderAlbumQueue();
+  composeAlbum();
+}
+
+function loadAlbumTemplate(file) {
+  if (!isImageFile(file)) return;
+  clearAlbumTemplate();
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = () => {
+    albumState.customTemplate = { file, url, image, name: file.name };
+    albumState.activePage = 0;
+    albumState.selectedItemId = null;
+    renderAlbumTemplateControl();
+    renderAlbumQueue();
+    composeAlbum();
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(url);
+    albumState.notice = `无法读取版式素材 ${file.name}`;
+    renderAlbumTemplateControl();
+    renderAlbumQueue();
+    composeAlbum();
+  };
+  image.src = url;
+}
+
 function loadAlbumImage(item) {
   const image = new Image();
   image.onload = () => {
@@ -375,6 +416,7 @@ function removeAlbumItem(id) {
 
 function clearAlbum() {
   albumState.items.forEach((item) => URL.revokeObjectURL(item.url));
+  if (albumState.customTemplate.url) URL.revokeObjectURL(albumState.customTemplate.url);
   albumState.items = [];
   albumState.output = null;
   albumState.notice = '';
@@ -385,11 +427,13 @@ function clearAlbum() {
   albumState.textPositions = [];
   albumState.textStyles = [];
   albumState.textTarget = 'title';
+  albumState.customTemplate = { file: null, url: '', image: null, name: '' };
   albumState.selectedItemId = null;
   albumState.canvasDrag = null;
   albumState.hitRegions = [];
   albumState.textRegions = [];
   loadActiveAlbumCopy();
+  renderAlbumTemplateControl();
   renderAlbumQueue();
   composeAlbum();
 }
@@ -447,6 +491,7 @@ function getAlbumLayoutVariant(pageIndex, itemCount) {
 }
 
 function getAlbumPages() {
+  if (albumState.customTemplate.image) return [{ index: 0, items: [], layoutVariant: 0, customTemplate: true }];
   const items = albumState.items.filter((item) => !item.error);
   let offset = 0;
   return getAlbumPageSizes(items.length).map((size, index) => {
@@ -598,8 +643,10 @@ function renderAlbumQueue() {
   const readyCount = albumState.items.filter((item) => item.image).length;
   const isLoading = readyCount < albumState.items.filter((item) => !item.error).length;
   const pageCapacity = getActiveAlbumPageSizeSetting() === 'auto' ? '当前页自动布局' : `当前页每页 ${getActiveAlbumPageSizeSetting()} 张`;
-  els.albumStatus.textContent = albumState.notice || (!albumState.items.length
-    ? '已添加 0 张，还需 1 张'
+  els.albumStatus.textContent = albumState.notice || (albumState.customTemplate.image
+    ? `已载入自定义版式 · ${albumState.items.length ? `${albumState.items.length} 张照片保留在队列` : '可直接添加文案'}`
+    : !albumState.items.length
+      ? '已添加 0 张，还需 1 张'
     : albumState.items.length === 1
       ? '已添加 1 张 · 单图全屏 · 可继续添加照片'
       : `已添加 ${albumState.items.length} 张 · ${isLoading ? '正在读取图片' : `自动生成 ${pages.length} 页 · ${pageCapacity}`}`);
@@ -632,6 +679,13 @@ function drawImageCover(context, image, x, y, width, height, transform = {}) {
   context.rotate(rotation);
   context.drawImage(image, -image.naturalWidth * scale / 2, -image.naturalHeight * scale / 2, image.naturalWidth * scale, image.naturalHeight * scale);
   context.restore();
+}
+
+function drawImageContain(context, image, x, y, width, height) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+  const drawWidth = image.naturalWidth * scale;
+  const drawHeight = image.naturalHeight * scale;
+  context.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight);
 }
 
 function drawAlbumItem(context, item, x, y, width, height, hitRegions) {
@@ -714,7 +768,10 @@ function renderAlbumPage(page, pageIndex, canvas) {
 
   const variant = page.layoutVariant;
   let layoutName = '';
-  if (ready.length === 1) {
+  if (page.customTemplate && albumState.customTemplate.image) {
+    drawImageContain(context, albumState.customTemplate.image, 0, 0, A3_WIDTH, A3_HEIGHT);
+    layoutName = '自定义版式 · 素材模板';
+  } else if (ready.length === 1) {
     drawAlbumItem(context, ready[0], 0, 0, A3_WIDTH, A3_HEIGHT, hitRegions);
     layoutName = '单图 · 全屏叠加文案';
   } else if (ready.length === 2) {
@@ -827,10 +884,13 @@ function composeAlbum() {
   const allReady = pages.length > 0 && pages.every((entry) => entry.items.every((item) => item.image));
 
   els.albumPageValue.textContent = pages.length ? `${albumState.activePage + 1} / ${pages.length}` : '0 / 0';
-  els.albumPageSize.value = getActiveAlbumPageSizeSetting();
+  els.albumPageSize.disabled = Boolean(albumState.customTemplate.image);
+  els.albumPageSize.value = albumState.customTemplate.image ? 'auto' : getActiveAlbumPageSizeSetting();
   els.albumPreviousPage.disabled = !pages.length || albumState.activePage === 0;
   els.albumNextPage.disabled = !pages.length || albumState.activePage === pages.length - 1;
-  els.albumExportNote.textContent = pages.length > 1 ? `${pages.length} 页 A3 PNG · 打包 ZIP` : 'A3 PNG · 3508 × 2480 px';
+  els.albumExportNote.textContent = albumState.customTemplate.image
+    ? 'A3 PNG · 自定义版式'
+    : pages.length > 1 ? `${pages.length} 页 A3 PNG · 打包 ZIP` : 'A3 PNG · 3508 × 2480 px';
   els.albumDownloadButton.disabled = !allReady;
   updateAlbumBackgroundControls(getAlbumBackground(page?.items || []));
   updateAlbumSelectionControls();
@@ -1036,10 +1096,16 @@ els.oneColumnButton.addEventListener('click', () => { state.gridColumns = 1; com
 els.threeColumnButton.addEventListener('click', () => { state.gridColumns = 3; compose(); });
 els.toolNavButtons.forEach((button) => button.addEventListener('click', () => switchWorkspace(button.dataset.workspace)));
 els.albumFileInput.addEventListener('change', (event) => addAlbumFiles(event.target.files));
+els.albumTemplateInput.addEventListener('change', (event) => {
+  const [file] = event.target.files;
+  if (file) loadAlbumTemplate(file);
+  event.target.value = '';
+});
 ['dragenter', 'dragover'].forEach((eventName) => els.albumDropzone.addEventListener(eventName, (event) => { event.preventDefault(); els.albumDropzone.classList.add('is-dragging'); }));
 ['dragleave', 'drop'].forEach((eventName) => els.albumDropzone.addEventListener(eventName, (event) => { event.preventDefault(); els.albumDropzone.classList.remove('is-dragging'); }));
 els.albumDropzone.addEventListener('drop', (event) => addAlbumFiles(event.dataTransfer.files));
 els.albumClearButton.addEventListener('click', clearAlbum);
+els.albumTemplateClear.addEventListener('click', clearAlbumTemplate);
 els.albumTitle.addEventListener('input', () => { saveActiveAlbumCopy(); composeAlbum(); });
 els.albumCopy.addEventListener('input', () => { saveActiveAlbumCopy(); composeAlbum(); });
 els.albumAutoBackground.addEventListener('click', () => setAlbumBackgroundMode('auto'));
@@ -1098,4 +1164,5 @@ els.albumNextPage.addEventListener('click', () => setActiveAlbumPage(albumState.
 els.albumDownloadButton.addEventListener('click', downloadAlbum);
 updateLayoutControl(false);
 renderQueue();
+renderAlbumTemplateControl();
 renderAlbumQueue();

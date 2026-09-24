@@ -134,6 +134,21 @@
                 <span>支持单图全屏或每页 2 至 6 张</span>
               </label>
 
+              <div class="album-template-control">
+                <div class="album-template-heading">
+                  <span class="control-label">自定义版式</span>
+                  <strong id="albumTemplateName">未上传</strong>
+                </div>
+                <div class="album-template-actions">
+                  <label class="template-upload-button" for="albumTemplateInput">
+                    <input id="albumTemplateInput" type="file" accept="image/*" />
+                    <span>上传版式素材</span><span aria-hidden="true">↥</span>
+                  </label>
+                  <button id="albumTemplateClear" class="text-button" type="button" disabled>清除</button>
+                </div>
+                <small class="album-template-hint">素材会按比例铺在整页，标题和正文可继续叠加编辑</small>
+              </div>
+
               <div id="albumQueue" class="album-queue" aria-live="polite"></div>
               <p id="albumStatus" class="album-status">等待添加照片</p>
 
