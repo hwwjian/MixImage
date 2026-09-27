@@ -516,8 +516,8 @@ function getAlbumTextPosition(pageIndex) {
 function getAlbumTextStyles(pageIndex) {
   if (!albumState.textStyles[pageIndex]) {
     albumState.textStyles[pageIndex] = {
-      title: { fontFamily: "'Microsoft YaHei', '微软雅黑', sans-serif", fontSize: 88, fontWeight: 600, color: '#222829' },
-      copy: { fontFamily: "'Microsoft YaHei', '微软雅黑', sans-serif", fontSize: 38, fontWeight: 400, color: '#555c58' },
+      title: { fontFamily: "'Microsoft YaHei', '微软雅黑', sans-serif", fontSize: 96, fontWeight: 600, color: '#222829' },
+      copy: { fontFamily: "'Microsoft YaHei', '微软雅黑', sans-serif", fontSize: 52, fontWeight: 500, color: '#3f4643' },
     };
   }
   return albumState.textStyles[pageIndex];
@@ -644,6 +644,8 @@ function renderAlbumQueue() {
 }
 
 function drawImageCover(context, image, x, y, width, height, transform = {}) {
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
   const border = 2;
   const innerX = x + border;
   const innerY = y + border;
