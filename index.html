@@ -175,7 +175,7 @@
                 </div>
                 <div class="album-text-style-grid">
                   <label class="field-label" for="albumFontFamily">
-                    <span>字体</span>
+                    <span class="field-label-heading"><span>字体</span><button id="albumLoadSystemFonts" class="font-access-button" type="button">读取系统字体</button></span>
                     <select id="albumFontFamily" class="style-select">
                       <option value="'Microsoft YaHei', '微软雅黑', sans-serif">微软雅黑</option>
                       <option value="'SimSun', '宋体', serif">宋体</option>
@@ -187,6 +187,7 @@
                       <option value="Georgia, serif">Georgia</option>
                       <option value="'Courier New', monospace">Courier New</option>
                     </select>
+                    <small id="albumFontStatus" class="font-access-status" aria-live="polite"></small>
                   </label>
                   <label class="field-label" for="albumFontWeight">
                     <span>粗细</span>

@@ -44,6 +44,8 @@ const els = {
   albumTextTitleTarget: document.querySelector('#albumTextTitleTarget'),
   albumTextCopyTarget: document.querySelector('#albumTextCopyTarget'),
   albumFontFamily: document.querySelector('#albumFontFamily'),
+  albumLoadSystemFonts: document.querySelector('#albumLoadSystemFonts'),
+  albumFontStatus: document.querySelector('#albumFontStatus'),
   albumFontWeight: document.querySelector('#albumFontWeight'),
   albumFontSize: document.querySelector('#albumFontSize'),
   albumFontSizeValue: document.querySelector('#albumFontSizeValue'),
@@ -543,6 +545,34 @@ function updateAlbumTextControls() {
   els.albumFontSizeValue.textContent = `${style.fontSize} px`;
   els.albumFontColor.value = style.color;
   els.albumFontColorSwatch.style.backgroundColor = style.color;
+}
+
+function ensureFontOption(value, label = value) {
+  if ([...els.albumFontFamily.options].some((option) => option.value === value)) return;
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = label;
+  option.dataset.systemFont = 'true';
+  els.albumFontFamily.appendChild(option);
+}
+
+async function loadSystemFonts() {
+  if (!('queryLocalFonts' in window)) {
+    els.albumFontStatus.textContent = '当前浏览器不支持，请使用最新版 Chrome 或 Edge';
+    return;
+  }
+  els.albumLoadSystemFonts.disabled = true;
+  els.albumFontStatus.textContent = '正在请求字体权限…';
+  try {
+    const fonts = await window.queryLocalFonts();
+    const families = [...new Set(fonts.map((font) => font.family).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'zh-CN'));
+    families.forEach((family) => ensureFontOption(`'${family.replaceAll("'", "\\'")}', sans-serif`, family));
+    els.albumFontStatus.textContent = families.length ? `已加入 ${families.length} 个系统字体` : '未找到可用字体';
+  } catch (error) {
+    els.albumFontStatus.textContent = error?.name === 'NotAllowedError' ? '未获得字体访问权限' : '读取系统字体失败';
+  } finally {
+    els.albumLoadSystemFonts.disabled = false;
+  }
 }
 
 function setAlbumTextTarget(target) {
@@ -1053,6 +1083,7 @@ els.albumBackgroundColor.addEventListener('input', (event) => {
 });
 els.albumTextTitleTarget.addEventListener('click', () => setAlbumTextTarget('title'));
 els.albumTextCopyTarget.addEventListener('click', () => setAlbumTextTarget('copy'));
+els.albumLoadSystemFonts.addEventListener('click', loadSystemFonts);
 els.albumFontFamily.addEventListener('change', (event) => updateAlbumTextStyle('fontFamily', event.target.value));
 els.albumFontWeight.addEventListener('change', (event) => updateAlbumTextStyle('fontWeight', event.target.value));
 els.albumFontSize.addEventListener('input', (event) => updateAlbumTextStyle('fontSize', event.target.value));
