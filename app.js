@@ -699,7 +699,8 @@ function renderAlbumPage(page, pageIndex, canvas) {
   const context = canvas.getContext('2d');
   const margin = 150;
   const photoTop = 135;
-  const photoHeight = 1630;
+  // Let multi-photo layouts run close to the lower copy area while keeping a small text-safe gap.
+  const photoHeight = 1765;
   const gap = 42;
   const contentWidth = A3_WIDTH - margin * 2;
   const ready = page.items;
