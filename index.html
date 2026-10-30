@@ -8,28 +8,10 @@
   </head>
   <body>
     <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="./">
-          <span class="brand-mark" aria-hidden="true">M</span>
-          <span class="brand-copy">
-            <strong>MixImage</strong>
-          </span>
-        </a>
-        <nav class="tool-nav" aria-label="功能选择">
-          <button class="tool-nav-button is-active" type="button" data-workspace="composer" aria-pressed="true">
-            <span aria-hidden="true">↕</span>长图合成
-          </button>
-          <button class="tool-nav-button" type="button" data-workspace="album" aria-pressed="false">
-            <span aria-hidden="true">▦</span>相册拼图
-          </button>
-        </nav>
-      </header>
-
       <main class="workspace">
         <section id="composerWorkspace" class="workspace-section">
           <div class="intro">
           <div>
-            <p class="eyebrow">IMAGE COMPOSER</p>
             <h1>图片合成</h1>
           </div>
           </div>
@@ -39,7 +21,6 @@
             <div class="liquid-glass-mount" aria-hidden="true"></div>
             <div class="panel-heading">
               <div>
-                <p class="section-kicker">图片来源</p>
                 <h2>导入图片</h2>
               </div>
               <button id="clearButton" class="text-button" type="button" disabled>清空 <span aria-hidden="true">⌫</span></button>
@@ -54,7 +35,6 @@
 
             <div class="queue-heading">
               <div>
-                <p class="section-kicker">图片队列</p>
                 <h2>排列顺序 <span id="imageCount">0</span></h2>
               </div>
             </div>
@@ -109,7 +89,6 @@
         <section id="albumWorkspace" class="workspace-section" hidden>
           <div class="intro album-intro">
             <div>
-              <p class="eyebrow">A3 PHOTO ALBUM</p>
               <h1>相册拼图</h1>
             </div>
             <span class="a3-spec">A3 横版 · 3508 × 2480 px</span>
@@ -120,7 +99,6 @@
               <div class="liquid-glass-mount" aria-hidden="true"></div>
               <div class="panel-heading">
                 <div>
-                  <p class="section-kicker">照片素材</p>
                   <h2>导入相册照片</h2>
                 </div>
                 <button id="albumClearButton" class="text-button" type="button" disabled>清空 <span aria-hidden="true">⌫</span></button>
@@ -220,7 +198,6 @@
               <div class="liquid-glass-mount" aria-hidden="true"></div>
               <div class="panel-heading preview-heading">
                 <div>
-                  <p class="section-kicker">实时预览</p>
                   <h2>A3 横版画布</h2>
                 </div>
                 <div class="album-preview-tools">
@@ -267,6 +244,15 @@
           </div>
         </section>
       </main>
+
+      <nav class="tool-nav bottom-tool-nav" aria-label="功能选择">
+        <button class="tool-nav-button is-active" type="button" data-workspace="composer" aria-pressed="true">
+          <span aria-hidden="true">↕</span>长图合成
+        </button>
+        <button class="tool-nav-button" type="button" data-workspace="album" aria-pressed="false">
+          <span aria-hidden="true">▦</span>相册拼图
+        </button>
+      </nav>
     </div>
     <script type="module" src="/app.js"></script>
   </body>

@@ -650,16 +650,13 @@ function renderAlbumQueue() {
 function drawImageCover(context, image, x, y, width, height, transform = {}) {
   context.imageSmoothingEnabled = true;
   context.imageSmoothingQuality = 'high';
-  const border = 2;
-  const innerX = x + border;
-  const innerY = y + border;
-  const innerWidth = width - border * 2;
-  const innerHeight = height - border * 2;
+  const innerX = x;
+  const innerY = y;
+  const innerWidth = width;
+  const innerHeight = height;
   const scale = Math.max(innerWidth / image.naturalWidth, innerHeight / image.naturalHeight) * (transform.scale || 1);
   const rotation = (transform.rotation || 0) * Math.PI / 180;
 
-  context.fillStyle = '#ffffff';
-  context.fillRect(x, y, width, height);
   context.save();
   context.beginPath();
   context.rect(innerX, innerY, innerWidth, innerHeight);
@@ -1144,12 +1141,12 @@ document.querySelectorAll('.liquid-glass-mount').forEach((mount) => {
     LiquidGlass,
     {
       className: 'liquid-glass-surface',
-      displacementScale: 28,
-      blurAmount: 0.1,
-      saturation: 135,
-      aberrationIntensity: 1.2,
+      displacementScale: 24,
+      blurAmount: 0.14,
+      saturation: 115,
+      aberrationIntensity: 1.1,
       elasticity: 0.12,
-      cornerRadius: 18,
+      cornerRadius: 20,
       padding: '0',
       mode: 'standard',
       style: { position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' },
