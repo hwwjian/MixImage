@@ -8,11 +8,15 @@ const GAP = 2;
 const state = { items: [], draggedId: null, output: null, backgroundMode: 'auto', backgroundColor: '#ffffff', gridColumns: 3 };
 const A3_WIDTH = 3508;
 const A3_HEIGHT = 2480;
+const COMPOSER_PREVIEW_MAX_WIDTH = 1600;
+const COMPOSER_PREVIEW_MAX_HEIGHT = 3000;
+const ALBUM_PREVIEW_WIDTH = 1400;
 const albumState = {
   items: [], draggedId: null, output: null, notice: '', activePage: 0, pageCopy: [], layoutVariants: [],
   backgroundMode: 'auto', backgroundColor: '#ffffff', pageSizeOverrides: [], textPositions: [], textStyles: [], textTarget: 'title', hitRegions: [], textRegions: [],
   selectedItemId: null, canvasDrag: null,
 };
+let albumComposeFrame = 0;
 
 const els = {
   fileInput: document.querySelector('#fileInput'),
@@ -95,7 +99,10 @@ function addFiles(fileList) {
   });
   if (files.length) {
     renderQueue();
-    Promise.all(state.items.slice(-files.length).map(loadImage)).then(compose);
+    Promise.all(state.items.slice(-files.length).map(loadImage)).then(() => {
+      renderQueue();
+      compose();
+    });
   }
   els.fileInput.value = '';
 }
@@ -108,8 +115,6 @@ function loadImage(item) {
       item.width = image.naturalWidth;
       item.height = image.naturalHeight;
       resolve(item);
-      renderQueue();
-      compose();
     };
     image.onerror = resolve;
     image.src = item.url;
@@ -255,25 +260,14 @@ function updateLayoutControl(isAvailable) {
   });
 }
 
-function compose() {
-  const composition = getComposition();
-  if (!composition) {
-    updateLayoutControl(false);
-    state.output = null;
-    els.previewFrame.classList.remove('has-result');
-    els.previewFrame.classList.add('empty-preview');
-    els.previewFrame.querySelector('.preview-empty-content').style.display = 'block';
-    els.downloadButton.disabled = true;
-    return;
-  }
-  updateLayoutControl(composition.layoutAvailable);
-  const { canvas } = els;
-  canvas.width = composition.width;
-  canvas.height = composition.height;
+function renderComposition(canvas, composition, scale = 1) {
+  canvas.width = Math.max(1, Math.round(composition.width * scale));
+  canvas.height = Math.max(1, Math.round(composition.height * scale));
   const context = canvas.getContext('2d');
+  context.setTransform(scale, 0, 0, scale, 0, 0);
   const background = state.backgroundMode === 'manual' ? state.backgroundColor : composition.background || '#ffffff';
   context.fillStyle = background;
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillRect(0, 0, composition.width, composition.height);
   if (composition.mode === 'column') {
     let y = 0;
     composition.ready.forEach((item, index) => {
@@ -293,6 +287,28 @@ function compose() {
       }
     });
   }
+  return background;
+}
+
+function compose() {
+  const composition = getComposition();
+  if (!composition) {
+    updateLayoutControl(false);
+    state.output = null;
+    els.previewFrame.classList.remove('has-result');
+    els.previewFrame.classList.add('empty-preview');
+    els.previewFrame.querySelector('.preview-empty-content').style.display = 'block';
+    els.downloadButton.disabled = true;
+    return;
+  }
+  updateLayoutControl(composition.layoutAvailable);
+  const { canvas } = els;
+  const previewScale = Math.min(
+    1,
+    COMPOSER_PREVIEW_MAX_WIDTH / composition.width,
+    COMPOSER_PREVIEW_MAX_HEIGHT / composition.height,
+  );
+  const background = renderComposition(canvas, composition, previewScale);
   state.output = { canvas, mode: composition.mode };
   els.previewFrame.classList.add('has-result');
   els.previewFrame.classList.remove('empty-preview');
@@ -305,7 +321,11 @@ function compose() {
 
 function downloadResult() {
   if (!state.output) return;
-  state.output.canvas.toBlob((blob) => {
+  const composition = getComposition();
+  if (!composition) return;
+  const exportCanvas = document.createElement('canvas');
+  renderComposition(exportCanvas, composition);
+  exportCanvas.toBlob((blob) => {
     if (!blob) return;
     const link = document.createElement('a');
     link.download = `miximage-${new Date().toISOString().slice(0, 10)}.png`;
@@ -342,26 +362,29 @@ function addAlbumFiles(fileList) {
     }));
   albumState.items.push(...addedItems);
   renderAlbumQueue();
-  addedItems.forEach(loadAlbumImage);
+  Promise.all(addedItems.map(loadAlbumImage)).then(() => {
+    renderAlbumQueue();
+    composeAlbum();
+  });
   els.albumFileInput.value = '';
 }
 
 function loadAlbumImage(item) {
-  const image = new Image();
-  image.onload = () => {
-    item.image = image;
-    item.width = image.naturalWidth;
-    item.height = image.naturalHeight;
-    renderAlbumQueue();
-    composeAlbum();
-  };
-  image.onerror = () => {
-    item.error = true;
-    albumState.notice = `无法读取 ${item.file.name}`;
-    renderAlbumQueue();
-    composeAlbum();
-  };
-  image.src = item.url;
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      item.image = image;
+      item.width = image.naturalWidth;
+      item.height = image.naturalHeight;
+      resolve(item);
+    };
+    image.onerror = () => {
+      item.error = true;
+      albumState.notice = `无法读取 ${item.file.name}`;
+      resolve(item);
+    };
+    image.src = item.url;
+  });
 }
 
 function removeAlbumItem(id) {
@@ -511,7 +534,7 @@ function getAlbumTextPosition(pageIndex) {
   if (!albumState.textPositions[pageIndex]) {
     albumState.textPositions[pageIndex] = {
       title: { x: 150, y: 2070 },
-      copy: { x: 1740, y: 1970 },
+      copy: { x: 150, y: 2220 },
     };
   }
   return albumState.textPositions[pageIndex];
@@ -716,6 +739,28 @@ function drawWrappedText(context, text, x, y, maxWidth, lineHeight, maxLines) {
   visibleLines.forEach((line, index) => context.fillText(line, x, y + index * lineHeight));
 }
 
+function drawAlbumBackground(context, image, background) {
+  context.fillStyle = background;
+  context.fillRect(0, 0, A3_WIDTH, A3_HEIGHT);
+  if (!image?.image) return;
+
+  const source = image.image;
+  const scale = Math.max(A3_WIDTH / source.naturalWidth, A3_HEIGHT / source.naturalHeight);
+  const drawWidth = source.naturalWidth * scale;
+  const drawHeight = source.naturalHeight * scale;
+  context.save();
+  context.globalAlpha = 1;
+  context.filter = 'blur(42px)';
+  context.drawImage(source, (A3_WIDTH - drawWidth) / 2, (A3_HEIGHT - drawHeight) / 2, drawWidth, drawHeight);
+  context.restore();
+
+  context.save();
+  context.globalAlpha = 0.75;
+  context.fillStyle = background;
+  context.fillRect(0, 0, A3_WIDTH, A3_HEIGHT);
+  context.restore();
+}
+
 function drawAlbumGrid(context, items, columns, rows, x, y, width, height, gap, hitRegions) {
   const cellWidth = (width - gap * (columns - 1)) / columns;
   const cellHeight = (height - gap * (rows - 1)) / rows;
@@ -727,9 +772,12 @@ function drawAlbumGrid(context, items, columns, rows, x, y, width, height, gap, 
 }
 
 function renderAlbumPage(page, pageIndex, canvas) {
-  canvas.width = A3_WIDTH;
-  canvas.height = A3_HEIGHT;
+  const isPreview = canvas === els.albumCanvas;
+  const renderScale = isPreview ? Math.min(1, ALBUM_PREVIEW_WIDTH / A3_WIDTH) : 1;
+  canvas.width = Math.round(A3_WIDTH * renderScale);
+  canvas.height = Math.round(A3_HEIGHT * renderScale);
   const context = canvas.getContext('2d');
+  context.setTransform(renderScale, 0, 0, renderScale, 0, 0);
   const margin = 150;
   const photoTop = 135;
   // Let multi-photo layouts run close to the lower copy area while keeping a small text-safe gap.
@@ -743,8 +791,7 @@ function renderAlbumPage(page, pageIndex, canvas) {
     albumState.textRegions = [];
   }
 
-  context.fillStyle = getAlbumBackground(ready);
-  context.fillRect(0, 0, A3_WIDTH, A3_HEIGHT);
+  drawAlbumBackground(context, ready[0], getAlbumBackground(ready));
 
   const variant = page.layoutVariant;
   let layoutName = '';
@@ -892,6 +939,14 @@ function composeAlbum() {
   els.albumPreviewFrame.querySelector('.preview-empty-content').style.display = 'none';
 }
 
+function scheduleComposeAlbum() {
+  if (albumComposeFrame) return;
+  albumComposeFrame = requestAnimationFrame(() => {
+    albumComposeFrame = 0;
+    composeAlbum();
+  });
+}
+
 function getAlbumCanvasPoint(event) {
   const bounds = els.albumCanvas.getBoundingClientRect();
   return {
@@ -941,7 +996,7 @@ function handleAlbumCanvasPointerMove(event) {
   position.y = clamp(position.y + deltaY, drag.type === 'title' ? 1750 : 1750, 2220);
   drag.lastX = point.x;
   drag.lastY = point.y;
-  composeAlbum();
+  scheduleComposeAlbum();
   event.preventDefault();
 }
 
