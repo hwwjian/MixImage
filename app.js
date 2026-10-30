@@ -1,5 +1,9 @@
 import './styles.css';
 
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import LiquidGlass from 'liquid-glass-react';
+
 const GAP = 2;
 const state = { items: [], draggedId: null, output: null, backgroundMode: 'auto', backgroundColor: '#ffffff', gridColumns: 3 };
 const A3_WIDTH = 3508;
@@ -1134,3 +1138,22 @@ els.albumDownloadButton.addEventListener('click', downloadAlbum);
 updateLayoutControl(false);
 renderQueue();
 renderAlbumQueue();
+
+document.querySelectorAll('.liquid-glass-mount').forEach((mount) => {
+  createRoot(mount).render(React.createElement(
+    LiquidGlass,
+    {
+      className: 'liquid-glass-surface',
+      displacementScale: 28,
+      blurAmount: 0.1,
+      saturation: 135,
+      aberrationIntensity: 1.2,
+      elasticity: 0.12,
+      cornerRadius: 18,
+      padding: '0',
+      mode: 'standard',
+      style: { position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' },
+    },
+    React.createElement('span', { className: 'liquid-glass-fill' }),
+  ));
+});

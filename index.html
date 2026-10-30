@@ -13,7 +13,6 @@
           <span class="brand-mark" aria-hidden="true">M</span>
           <span class="brand-copy">
             <strong>MixImage</strong>
-            <span>轻松合成你的长图</span>
           </span>
         </a>
         <nav class="tool-nav" aria-label="功能选择">
@@ -37,6 +36,7 @@
 
           <div class="studio-grid">
           <div class="control-panel">
+            <div class="liquid-glass-mount" aria-hidden="true"></div>
             <div class="panel-heading">
               <div>
                 <p class="section-kicker">图片来源</p>
@@ -49,7 +49,7 @@
               <input id="fileInput" type="file" accept="image/*" multiple />
               <span class="drop-icon" aria-hidden="true">↥</span>
               <strong>拖动图片到这里</strong>
-              <span>或点击选择文件 · 支持 JPG / PNG / WEBP</span>
+              <span>点击或拖入 · JPG / PNG / WEBP</span>
             </label>
 
             <div class="queue-heading">
@@ -57,13 +57,11 @@
                 <p class="section-kicker">图片队列</p>
                 <h2>排列顺序 <span id="imageCount">0</span></h2>
               </div>
-              <span class="drag-hint">拖动卡片调整顺序</span>
             </div>
             <div id="queue" class="queue empty-state">
               <div class="empty-queue">
                 <span aria-hidden="true">▧</span>
                 <p>还没有图片</p>
-                <small>先把几张图片放进来吧</small>
               </div>
             </div>
 
@@ -75,6 +73,7 @@
           </div>
 
           <div class="preview-panel">
+            <div class="liquid-glass-mount" aria-hidden="true"></div>
             <div class="panel-heading preview-heading">
               <div>
                 <h2>合成结果</h2>
@@ -100,7 +99,6 @@
               <div class="preview-empty-content">
                 <div class="preview-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
                 <p>你的合成图会出现在这里</p>
-                <small>添加图片后实时预览</small>
               </div>
               <canvas id="resultCanvas" aria-label="图片合成预览"></canvas>
             </div>
@@ -119,6 +117,7 @@
 
           <div class="studio-grid album-studio-grid">
             <div class="control-panel album-control-panel">
+              <div class="liquid-glass-mount" aria-hidden="true"></div>
               <div class="panel-heading">
                 <div>
                   <p class="section-kicker">照片素材</p>
@@ -131,7 +130,7 @@
                 <input id="albumFileInput" type="file" accept="image/*" multiple />
                 <span class="drop-icon" aria-hidden="true">↥</span>
                 <strong>拖入多张照片</strong>
-                <span>支持单图全屏或每页 2 至 6 张</span>
+                <span>点击或拖入 · 1 至 6 张</span>
               </label>
 
               <div id="albumQueue" class="album-queue" aria-live="polite"></div>
@@ -218,6 +217,7 @@
             </div>
 
             <div class="preview-panel album-preview-panel">
+              <div class="liquid-glass-mount" aria-hidden="true"></div>
               <div class="panel-heading preview-heading">
                 <div>
                   <p class="section-kicker">实时预览</p>
@@ -260,7 +260,6 @@
                 <div class="preview-empty-content">
                   <div class="album-placeholder" aria-hidden="true"><span></span><span></span><span></span></div>
                   <p>拖入照片开始排版</p>
-                  <small>添加 1 张即可生成单图全屏页面</small>
                 </div>
                 <canvas id="albumCanvas" aria-label="A3 相册拼图预览"></canvas>
               </div>
